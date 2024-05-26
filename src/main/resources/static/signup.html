@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원가입</title>
+    <style>
+        /* 스타일링 */
+        label {
+            display: block;
+            margin-bottom: 8px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            margin: 5px;
+            cursor: pointer;
+        }
+        input {
+            padding: 8px;
+            margin-bottom: 15px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        /* 입력 칸의 최대 너비 설정 */
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            max-width: 300px;
+        }
+    </style>
+</head>
+<body>
+
+<form id="signupForm" method="post">
+    <!-- 이름 입력 -->
+    <label for="name">이름:</label>
+    <input type="text" id="name" name="name" required>
+
+    <!-- 이메일 입력 -->
+    <label for="email">이메일:</label>
+    <input type="email" id="email" name="email" required>
+
+    <!-- 비밀번호 입력 -->
+    <label for="password">비밀번호:</label>
+    <input type="password" id="password" name="password" required>
+
+    <!-- 비밀번호 확인 입력 -->
+    <label for="checkPassword">비밀번호 확인:</label>
+    <input type="password" id="checkPassword" name="checkPassword" required>
+    <br>
+    <!-- 회원가입 버튼 -->
+    <button type="button" onclick="submitForm()">회원가입</button>
+
+    <!-- 메시지 표시용 엘리먼트 -->
+    <div id="message"></div>
+</form>
+
+<script>
+    function submitForm() {
+        var formData = {
+            name: document.getElementById('name').value,
+            email: document.getElementById('email').value,
+            password: document.getElementById('password').value,
+            checkPassword: document.getElementById('checkPassword').value
+        };
+
+        // Ajax 통신으로 JSON 데이터 전송
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/sign", true);
+        xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    alert("회원가입 성공!");
+                    // Corrected navigation line
+                    window.location.href = "/cookie-login.html";
+                } else {
+                    alert("회원가입 실패. 다시 시도하세요.");
+                }
+            }
+        };
+
+        xhr.send(JSON.stringify(formData));
+    }
+</script>
+
+
+
+</body>
+</html>
