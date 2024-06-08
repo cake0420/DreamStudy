@@ -4,6 +4,7 @@ import com.example.springsecurity.config.jwt.JwtAuthenticationFilter;
 import com.example.springsecurity.config.jwt.JwtAuthorizationFilter;
 import com.example.springsecurity.config.jwt.JwtProperties;
 import com.example.springsecurity.repository.UserRepository;
+import com.example.springsecurity.service.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,6 +28,9 @@ public class WebSecurityConfig {
     @Autowired
     private JwtProperties jwtProperties;
 
+    @Autowired
+    private TokenService tokenService;
+
     @Bean
     public RoleHierarchy roleHierarchy() {
         RoleHierarchyImpl roleHierarchy = new RoleHierarchyImpl();
@@ -44,7 +48,7 @@ public class WebSecurityConfig {
                 .requestMatchers("/admin").hasRole("ADMIN")
                 .anyRequest().permitAll())
                 .csrf(AbstractHttpConfigurer::disable)
-                .addFilter(new JwtAuthenticationFilter(authenticationManager, jwtProperties))
+                .addFilter(new JwtAuthenticationFilter(authenticationManager, jwtProperties, tokenService))
                 .addFilter(new JwtAuthorizationFilter(authenticationManager, jwtProperties, userRepository));
 
         return http.build();

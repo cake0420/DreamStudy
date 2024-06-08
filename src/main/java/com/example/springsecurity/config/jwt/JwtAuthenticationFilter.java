@@ -3,6 +3,7 @@ package com.example.springsecurity.config.jwt;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.example.springsecurity.dto.LoginRequestDto;
+import com.example.springsecurity.service.TokenService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -17,17 +18,20 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.io.IOException;
-import java.util.Date;
 import java.util.List;
+
 
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
 
     private final JwtProperties jwtProperties;
 
-    public JwtAuthenticationFilter(AuthenticationManager authenticationManager, JwtProperties jwtProperties) {
+    private final TokenService tokenService;
+
+    public JwtAuthenticationFilter(AuthenticationManager authenticationManager, JwtProperties jwtProperties, TokenService tokenService) {
         this.authenticationManager = authenticationManager;
         this.jwtProperties = jwtProperties;
+        this.tokenService = tokenService;
         setFilterProcessesUrl("/login");
     }
 
@@ -65,18 +69,15 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .toList();
         String rolesString = String.join(",", roles);
 
-        String jwtToken = JWT.create()
-                .withSubject(userDetails.getUsername())
-                .withExpiresAt(new Date(System.currentTimeMillis() + 600000L))
-                .withClaim("email", userDetails.getUsername())
-                .withClaim("role", rolesString) // Role 정보 추가
-                .sign(Algorithm.HMAC512(jwtProperties.getSecret()));
+        String access = tokenService.accessToken(userDetails.getUsername(), rolesString, jwtProperties.getSecret());
+        System.out.println("필터 email: "+userDetails.getUsername());
+        String refresh = tokenService.refreshToken(userDetails.getUsername(), rolesString, jwtProperties.getSecret());
 
-        response.addHeader(jwtProperties.getHEADER_STRING(), jwtProperties.getTOKEN_PREFIX()+jwtToken);
+        response.addHeader(jwtProperties.getHEADER_STRING(), jwtProperties.getTOKEN_PREFIX()+access);
 
         response.setContentType("application/json");
         response.setStatus(HttpServletResponse.SC_OK);
-        response.getWriter().write("{\"token\": \"" + jwtProperties.getTOKEN_PREFIX() + jwtToken + "\"}");
+        response.getWriter().write("{\"token\": \"" + jwtProperties.getTOKEN_PREFIX() + access + "\"}");
     }
 
     //로그인 실패

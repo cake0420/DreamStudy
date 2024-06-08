@@ -27,6 +27,9 @@ public class User {
     @Column(nullable = false, length = 50, name = "role")
     private String role;
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private RefreshToken refreshToken;
+
     @Builder
     public User(String name, String email, String password, String role){
         this.name = name;

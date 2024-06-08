@@ -49,7 +49,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         if (username != null) {
             User user = userRepository.findByEmail(username);
             System.out.println("체크체크: " + user.getRole());
-            if (user != null && Objects.equals(role, user.getRole())) {
+            if (Objects.equals(role, user.getRole())) {
                 System.out.println("role 동일");
 
                 // 인증은 토큰 검증시 끝. 인증을 하기 위해서가 아닌 스프링 시큐리티가 수행해주는 권한 처리를 위해
@@ -64,8 +64,10 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
                 // 강제로 시큐리티의 세션에 접근하여 값 저장
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } else {
-                throw new UsernameNotFoundException("role is null");
+                throw new UsernameNotFoundException("role is not matched");
             }
+        } else {
+            throw new UsernameNotFoundException("User is null");
         }
 
         chain.doFilter(request, response);
